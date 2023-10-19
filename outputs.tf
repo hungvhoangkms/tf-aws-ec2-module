@@ -14,13 +14,6 @@ output "arn" {
   )
 }
 
-output "capacity_reservation_specification" {
-  description = "Capacity reservation specification of the instance"
-  value = try(
-    aws_instance.this.capacity_reservation_specification,
-    null,
-  )
-}
 
 output "instance_state" {
   description = "The state of the instance"
@@ -150,30 +143,4 @@ output "iam_instance_profile_id" {
 output "iam_instance_profile_unique" {
   description = "Stable and unique string identifying the IAM instance profile"
   value       = try(aws_iam_instance_profile.this[0].unique_id, null)
-}
-
-################################################################################
-# Block Devices
-################################################################################
-output "root_block_device" {
-  description = "Root block device information"
-  value = try(
-    aws_instance.this.root_block_device,
-    null
-  )
-}
-
-output "ebs_block_device" {
-  description = "EBS block device information"
-  value = try(
-    aws_instance.this.ebs_block_device,
-    null
-  )
-}
-
-output "ephemeral_block_device" {
-  description = "Ephemeral block device information"
-  value = try(
-    aws_instance.this.ephemeral_block_device,
-  )
 }

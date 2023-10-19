@@ -7,7 +7,7 @@ variable "name" {
 variable "ami" {
   description = "ID of AMI to use for the instance"
   type        = string
-  default     = null
+  default     = "ami-0556fb70e2e8f34b7"
 }
 
 variable "associate_public_ip_address" {
@@ -16,58 +16,17 @@ variable "associate_public_ip_address" {
   default     = null
 }
 
-variable "maintenance_options" {
-  description = "The maintenance options for the instance"
-  type        = any
-  default     = {}
-}
-
 variable "availability_zone" {
   description = "AZ to start the instance in"
   type        = string
   default     = null
 }
 
-variable "capacity_reservation_specification" {
-  description = "Describes an instance's Capacity Reservation targeting option"
-  type        = any
-  default     = {}
-}
-
-variable "cpu_credits" {
-  description = "The credit option for CPU usage (unlimited or standard)"
-  type        = string
-  default     = null
-}
 
 variable "disable_api_termination" {
   description = "If true, enables EC2 Instance Termination Protection"
   type        = bool
   default     = null
-}
-
-variable "ebs_block_device" {
-  description = "Additional EBS block devices to attach to the instance"
-  type        = list(any)
-  default     = []
-}
-
-variable "ebs_optimized" {
-  description = "If true, the launched EC2 instance will be EBS-optimized"
-  type        = bool
-  default     = null
-}
-
-variable "enclave_options_enabled" {
-  description = "Whether Nitro Enclaves will be enabled on the instance. Defaults to `false`"
-  type        = bool
-  default     = null
-}
-
-variable "ephemeral_block_device" {
-  description = "Customize Ephemeral (also known as Instance Store) volumes on the instance"
-  type        = list(map(string))
-  default     = []
 }
 
 variable "get_password_data" {
@@ -130,22 +89,14 @@ variable "key_name" {
   default     = null
 }
 
-variable "launch_template" {
-  description = "Specifies a Launch Template to configure the instance. Parameters configured on this resource will override the corresponding parameters in the Launch Template"
-  type        = map(string)
-  default     = {}
+variable "create_new_key" {
+  description = "Crat new Key Pair to use for the instance; which can be managed using the `aws_key_pair` resource"
+  type        = object({
+    key_name : string
+    public_key: string
+  })
+  default     = null
 }
-
-variable "metadata_options" {
-  description = "Customize the metadata options of the instance"
-  type        = map(string)
-  default = {
-    "http_endpoint"               = "enabled"
-    "http_put_response_hop_limit" = 1
-    "http_tokens"                 = "optional"
-  }
-}
-
 variable "monitoring" {
   description = "If true, the launched EC2 instance will have detailed monitoring enabled"
   type        = bool
@@ -168,12 +119,6 @@ variable "private_ip" {
   description = "Private IP address to associate with the instance in a VPC"
   type        = string
   default     = null
-}
-
-variable "root_block_device" {
-  description = "Customize details about the root block device of the instance. See Block Devices below for details"
-  type        = list(any)
-  default     = []
 }
 
 variable "secondary_private_ips" {
@@ -239,30 +184,6 @@ variable "enable_volume_tags" {
 variable "vpc_security_group_ids" {
   description = "A list of security group IDs to associate with"
   type        = list(string)
-  default     = null
-}
-
-variable "timeouts" {
-  description = "Define maximum timeout for creating, updating, and deleting EC2 instance resources"
-  type        = map(string)
-  default     = {}
-}
-
-variable "cpu_options" {
-  description = "Defines CPU options to apply to the instance at launch time."
-  type        = any
-  default     = {}
-}
-
-variable "cpu_core_count" {
-  description = "Sets the number of CPU cores for an instance" # This option is only supported on creation of instance type that support CPU Options https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-optimize-cpu.html#cpu-options-supported-instances-values
-  type        = number
-  default     = null
-}
-
-variable "cpu_threads_per_core" {
-  description = "Sets the number of CPU threads per core for an instance (has no effect unless cpu_core_count is also set)"
-  type        = number
   default     = null
 }
 
