@@ -1,12 +1,16 @@
 data "aws_partition" "current" {}
 
+locals {
+  security_group_ids = flatten([var.vpc_security_group_ids != null ? var.vpc_security_group_ids : [], aws_security_group.this[0].id != null ? [aws_security_group.this[0].id] : []])
+}
+
 ################################################################################
 # Instance
 ################################################################################
 resource "aws_instance" "this" {
-  ami                  = var.ami
-  instance_type        = var.instance_type
-  hibernation          = var.hibernation
+  ami           = var.ami
+  instance_type = var.instance_type
+  hibernation   = var.hibernation
 
   user_data                   = var.user_data
   user_data_base64            = var.user_data_base64
@@ -14,9 +18,9 @@ resource "aws_instance" "this" {
 
   availability_zone      = var.availability_zone
   subnet_id              = var.subnet_id
-  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_security_group_ids = local.security_group_ids
 
-  key_name             = create_new_key ? aws_key_pair.this[0].key_name : var.key_name
+  key_name             = var.create_new_key != null ? aws_key_pair.this[0].key_name : var.key_name
   monitoring           = var.monitoring
   get_password_data    = var.get_password_data
   iam_instance_profile = var.create_iam_instance_profile ? aws_iam_instance_profile.this[0].name : var.iam_instance_profile
@@ -53,14 +57,60 @@ resource "aws_instance" "this" {
     ]
   }
 }
+
+################################################################################
+# Security group
+################################################################################
+
+resource "aws_security_group" "this" {
+  count       = var.security_group != null ? 1 : 0
+  name        = "${var.name}-sg"
+  description = "${var.name} network security group"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description      = var.security_group.ingress.description
+    from_port        = var.security_group.ingress.from_port
+    to_port          = var.security_group.ingress.to_port
+    protocol         = var.security_group.ingress.protocol
+    cidr_blocks      = var.security_group.ingress.cidr_blocks
+    ipv6_cidr_blocks = var.security_group.ingress.ipv6_cidr_blocks
+  }
+
+  dynamic "egress" {
+    for_each = var.security_group.egress != null ? [] : [1]
+    content {
+      from_port        = 0
+      to_port          = 0
+      protocol         = "-1"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+    }
+
+  }
+  dynamic "egress" {
+    for_each = var.security_group.egress  != null ? [1] : []
+    content {
+      description      = var.security_group.egress.description
+      from_port        = var.security_group.egress.from_port
+      to_port          = var.security_group.egress.to_port
+      protocol         = var.security_group.egress.protocol
+      cidr_blocks      = var.security_group.egress.cidr_blocks
+      ipv6_cidr_blocks = var.security_group.egress.ipv6_cidr_blocks
+    }
+
+  }
+
+  tags = merge({ "Name" = "${var.name}-sg" }, var.instance_tags, var.custom_tags)
+}
 ################################################################################
 # Key pair
 ################################################################################
 
 resource "aws_key_pair" "this" {
-  count = create_new_key? 1: 0
-  key_name   = create_new_key.key_name
-  public_key = create_new_key.public_key
+  count      = var.create_new_key != null ? 1 : 0
+  key_name   = var.create_new_key.key_name
+  public_key = var.create_new_key.public_key
 }
 
 

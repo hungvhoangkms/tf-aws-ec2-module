@@ -90,12 +90,36 @@ variable "key_name" {
 }
 
 variable "create_new_key" {
-  description = "Crat new Key Pair to use for the instance; which can be managed using the `aws_key_pair` resource"
-  type        = object({
+  description = "Create new Key Pair to use for the instance; which can be managed using the `aws_key_pair` resource"
+  type = object({
     key_name : string
-    public_key: string
+    public_key : string
   })
-  default     = null
+  default = null
+}
+
+
+variable "security_group" {
+  description = "Create new SG to attach in instance"
+  type = object({
+    ingress : object({
+      description      = string
+      from_port        = number
+      to_port          = number
+      protocol         = string
+      cidr_blocks      = list(string)
+      ipv6_cidr_blocks = list(string)
+    })
+    egress : object({
+      description      = string
+      from_port        = number
+      to_port          = number
+      protocol         = string
+      cidr_blocks      = list(string)
+      ipv6_cidr_blocks = list(string)
+    })
+  })
+  default = null
 }
 variable "monitoring" {
   description = "If true, the launched EC2 instance will have detailed monitoring enabled"
@@ -135,6 +159,12 @@ variable "source_dest_check" {
 
 variable "subnet_id" {
   description = "The VPC Subnet ID to launch in"
+  type        = string
+  default     = null
+}
+
+variable "vpc_id" {
+  description = "The VPC ID to create SG"
   type        = string
   default     = null
 }
